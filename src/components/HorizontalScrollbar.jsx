@@ -1,10 +1,11 @@
-import { useContext } from 'react'
+import { useContext, lazy, Suspense } from 'react'
 import { Box, Typography } from '@mui/material'
 import { ScrollMenu, VisibilityContext } from 'react-horizontal-scrolling-menu'
 import RightArrowIcon from '../assets/icons/right-arrow.png'
 import LeftArrowIcon from '../assets/icons/left-arrow.png'
-import BodyPart from './BodyPart'
-import ExerciseCard from './ExerciseCard'
+
+const BodyPart = lazy(() => import('./BodyPart'))
+const ExerciseCard = lazy(() => import('./ExerciseCard'))
 
 const LeftArrow = () => {
   const { scrollPrev } = useContext(VisibilityContext)
@@ -36,15 +37,17 @@ const HorizontalScrollbar = ({ data, bodyPart, setBodyPart, isBodyParts }) => {
           title={item.id || item}
           m='0 40px'
         >
-          {isBodyParts ? (
-            <BodyPart
-              item={item}
-              bodyPart={bodyPart}
-              setBodyPart={setBodyPart}
-            />
-          ) : (
-            <ExerciseCard exercise={item} />
-          )}
+          <Suspense fallback={null}>
+            {isBodyParts ? (
+              <BodyPart
+                item={item}
+                bodyPart={bodyPart}
+                setBodyPart={setBodyPart}
+              />
+            ) : (
+              <ExerciseCard exercise={item} />
+            )}
+          </Suspense>
         </Box>
       ))}
     </ScrollMenu>
