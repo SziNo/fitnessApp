@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useParams } from 'react-router-dom'
 import { Box } from '@mui/material'
 import { exerciseOptions, youtubeOptions, fetchData } from '../utils/fetchData'
-import Detail from '../components/Detail'
-import ExerciseVideos from '../components/ExerciseVideos'
-import SimilarExercises from '../components/SimilarExercises'
+
+const Detail = lazy(() => import('../components/Detail'))
+const ExerciseVideos = lazy(() => import('../components/ExerciseVideos'))
+const SimilarExercises = lazy(() => import('../components/SimilarExercises'))
 
 const ExerciseDetail = () => {
   const [exerciseDetail, setExerciseDetail] = useState({})
@@ -14,6 +15,8 @@ const ExerciseDetail = () => {
   const { id } = useParams()
 
   useEffect(() => {
+    window.scrollTo(0, 0)
+
     const fetchExercisesData = async () => {
       const exerciseDbUrl = 'https://exercisedb.p.rapidapi.com'
       const youtubeSearchUrl =
@@ -48,15 +51,17 @@ const ExerciseDetail = () => {
 
   return (
     <Box>
-      <Detail exerciseDetail={exerciseDetail} />
-      <ExerciseVideos
-        exerciseVideos={exerciseVideos}
-        name={exerciseDetail.name}
-      />
-      <SimilarExercises
-        targetMuscleExercises={targetMuscleExercises}
-        equipmentExercises={equipmentExercises}
-      />
+      <Suspense fallback={null}>
+        <Detail exerciseDetail={exerciseDetail} />
+        <ExerciseVideos
+          exerciseVideos={exerciseVideos}
+          name={exerciseDetail.name}
+        />
+        <SimilarExercises
+          targetMuscleExercises={targetMuscleExercises}
+          equipmentExercises={equipmentExercises}
+        />
+      </Suspense>
     </Box>
   )
 }
