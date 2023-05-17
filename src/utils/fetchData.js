@@ -16,8 +16,18 @@ export const youtubeOptions = {
 }
 
 export const fetchData = async (url, options) => {
+  const cachedData = localStorage.getItem(url)
+  if (cachedData) {
+    return JSON.parse(cachedData)
+  }
+
   const response = await fetch(url, options)
+  if (!response.ok) {
+    throw new Error('An error occurred while fetching data')
+  }
   const data = await response.json()
+
+  localStorage.setItem(url, JSON.stringify(data))
 
   return data
 }
