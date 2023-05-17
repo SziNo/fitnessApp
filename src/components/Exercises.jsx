@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import Pagination from '@mui/material/Pagination'
 import { Box, Stack, Typography } from '@mui/material'
 import { exerciseOptions, fetchData } from '../utils/fetchData'
-import ExerciseCard from './ExerciseCard'
+
+const ExerciseCard = lazy(() => import('./ExerciseCard'))
 
 const Exercises = ({ exercises, setExercises, bodyPart }) => {
   const [currentPage, setCurrentPage] = useState(1)
@@ -22,24 +23,17 @@ const Exercises = ({ exercises, setExercises, bodyPart }) => {
 
   useEffect(() => {
     const fetchExercisesData = async () => {
-      let exercisesData = []
+      const url =
+        bodyPart === 'all'
+          ? 'https://exercisedb.p.rapidapi.com/exercises'
+          : `https://exercisedb.p.rapidapi.com/exercises/bodyPart/${bodyPart}`
 
-      if (bodyPart === 'all') {
-        exercisesData = await fetchData(
-          'https://exercisedb.p.rapidapi.com/exercises',
-          exerciseOptions
-        )
-      } else {
-        exercisesData = await fetchData(
-          `https://exercisedb.p.rapidapi.com/exercises/bodyPart/${bodyPart}`,
-          exerciseOptions
-        )
-      }
+      const exercisesData = await fetchData(url, exerciseOptions)
       setExercises(exercisesData)
     }
 
     fetchExercisesData()
-  }, [bodyPart])
+  }, [bodyPart, setExercises])
 
   return (
     <Box id='exercises' sx={{ mt: { lg: '110px' } }} mt='50px' p='20px'>
@@ -52,9 +46,11 @@ const Exercises = ({ exercises, setExercises, bodyPart }) => {
         flexWrap='wrap'
         justifyContent='center'
       >
-        {currentExercises.map((exercise, index) => (
-          <ExerciseCard key={index} exercise={exercise} />
-        ))}
+        <Suspense fallback={null}>
+          {currentExercises.map((exercise) => (
+            <ExerciseCard key={exercise.id} exercise={exercise} />
+          ))}
+        </Suspense>
       </Stack>
       <Stack mt='100px' alignItems='center'>
         {exercises.length > 9 && (
